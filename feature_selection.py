@@ -133,3 +133,31 @@ plt.title('Feature Selection using ANOVA for KNN')
 plt.grid()
 plt.savefig('../output/feature_selection_knn.png')
 plt.show()
+
+### Now use the best number of features to train the final model
+best_k = 1000 #search plateau in the ANOVA plot!
+selector = SelectKBest(f_classif, k=best_k)
+X_resampled_new = selector.fit_transform(X_resampled, y_resampled)
+X_new = selector.transform(X)
+
+# Best features
+# Get the scores (F-values) of each feature
+feature_scores = selector.scores_
+# Create a dictionary mapping feature names to their scores
+feature_score_dict = dict(zip(data.columns[:-1], feature_scores))
+# Sort the dictionary by scores in descending order
+sorted_feature_score_dict = dict(sorted(feature_score_dict.items(), key=lambda item: item[1], reverse=True))
+# Print the top features and their scores
+top_features = list(sorted_feature_score_dict.keys())[:10]  # Print the top 10 features
+print("Top features and their scores:")
+for feature in top_features:
+    print(f"Feature: {feature}, Score: {sorted_feature_score_dict[feature]}")
+
+
+# Standardize the features
+scaler = StandardScaler()
+X_resampled_new = scaler.fit_transform(X_resampled_new)
+X_new = scaler.transform(X_new)
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X_new, y, test_size=0.2, random_state=42)
