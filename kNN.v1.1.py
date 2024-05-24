@@ -9,20 +9,21 @@ from sklearn.decomposition import PCA
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import StandardScaler
 from sklearn import metrics
+from sklearn.impute import SimpleImputer
 
 
-data = pd.read_csv("C:/Users/nilss/Downloads/03-project/03-project/DRIAMS-EC/DRIAMS-EC/driams_Escherichia coli_Ceftriaxone_features.csv")
 
-label = pd.read_csv("C:/Users/nilss/Downloads/03-project/03-project/DRIAMS-EC/DRIAMS-EC/driams_Escherichia coli_Ceftriaxone_labels.csv")
+data = pd.read_csv("C:/Users/nilss/Documents/GitHub/driams_Escherichia coli_Ceftriaxone_features.csv")
 
+label = pd.read_csv("C:/Users/nilss/Documents/GitHub/driams_Escherichia coli_Ceftriaxone_labels.csv")
 
 X = data[data.columns[1:]]
 y = label[label.columns[1:]]
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=69)
 
-std_scaler = StandardScaler()
-scaled_X_train = std_scaler.fit_transform(X_train)
-scaled_X_test  = std_scaler.transform(X_test)
+
+imp = SimpleImputer(missing_values=np.nan, strategy='mean')
+imp.fit(X)
+X_imp= imp.transform(X)
 
 pca = {}
 pca_X_train = {}
@@ -35,6 +36,16 @@ recall = {}
 folds = 10
 base = 400
 rate = 50
+split = 0.3
+
+
+X_train, X_test, y_train, y_test = train_test_split(X_imp, y, test_size=split, random_state=69)
+
+std_scaler = StandardScaler()
+scaled_X_train = std_scaler.fit_transform(X_train)
+scaled_X_test  = std_scaler.transform(X_test)
+
+
 
 fig, ax = plt.subplots(figsize=(12, 12))
 for i in range(1,folds):
@@ -61,29 +72,13 @@ plt.xlabel("False Positive Rate")
 plt.ylabel("True Positive Rate")
 plt.title("ROC-Curve")
 plt.legend(loc="lower right")
-plt.savefig("C:/Users/nilss/Downloads/ROC_0.2_split.pdf")
+plt.savefig(f"C:/Users/nilss/Documents/GitHub/FoDSProject/ROC_{str(split)}_split_{str(base)}_base{str(rate)}_rate.pdf")
 
 for j in range(1,folds):
   print("Fold : ", base+j*rate)
   print("Accuracy:", accuracy[j])
   print("Precision:", precision[j])
   print("Recall:", recall[j])
-
-nums = np.arange(70)
-var_ratio = []
-for num in nums:
-  pca = PCA(n_components=num)
-  pca.fit(scaled_X_train)
-  var_ratio.append(np.sum(pca.explained_variance_ratio_))
-plt.figure(figsize=(8,4))
-plt.grid()
-plt.plot(nums,var_ratio,marker='o')
-plt.xlabel('n_components')
-plt.ylabel('Explained variance ratio')
-plt.title('n_components vs. Explained Variance Ratio')
-plt.axhline(y=0.8, color='r', linestyle='--')
-plt.show
-
 
 
 
