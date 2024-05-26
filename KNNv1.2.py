@@ -25,9 +25,9 @@ def evaluate_features_knn(k, n_neighbors):
     return scores.mean()
 
 #variables
-num_Neighbor = 11
+num_Neighbor = 21
 split = 0.3
-best_k_num = 22
+best_k_num = 52
 
 #read data
 data_features = pd.read_csv("../data/driams_Escherichia coli_Ceftriaxone_features.csv")
@@ -39,14 +39,8 @@ data = data.drop(columns=['ID'])
 X = data.iloc[:, :-1].values
 y = data.iloc[:, -1].values
 
-
-
-# Standardize the features
-scaler = StandardScaler()
-X_scaled = scaler.fit_transform(X)
-
 #Elbow plot to determine k
-x_training_data, x_test_data, y_training_data, y_test_data = train_test_split(X_scaled, y, test_size = split)
+x_training_data, x_test_data, y_training_data, y_test_data = train_test_split(X, y, test_size = split)
 error_rates = []
 for i in np.arange(1, 50, step=2):
     new_model = KNeighborsClassifier(n_neighbors = i)
@@ -65,7 +59,7 @@ plt.close()
 
 #resampling
 smote = SMOTE(random_state=42)
-X_resampled, y_resampled = smote.fit_resample(X_scaled, y)
+X_resampled, y_resampled = smote.fit_resample(X, y)
 
 
 
@@ -87,7 +81,7 @@ plt.close()
 
 selector = SelectKBest(f_classif, k=best_k_num)
 X_resampled_new = selector.fit_transform(X_resampled, y_resampled)
-X_new = selector.transform(X_scaled)
+X_new = selector.transform(X)
 feature_scores = selector.scores_
 feature_score_dict = dict(zip(data.columns[:-1], feature_scores))
 sorted_feature_score_dict = dict(sorted(feature_score_dict.items(), key=lambda item: item[1], reverse=True))
@@ -95,6 +89,12 @@ top_features = list(sorted_feature_score_dict.keys())[:best_k]
 print("Top features and their scores:")
 for feature in top_features:
     print(f"Feature: {feature}, Score: {sorted_feature_score_dict[feature]}")
+
+
+# Standardize the features
+scaler = StandardScaler()
+X_resampled_new = scaler.fit_transform(X_resampled_new)
+X_new = scaler.transform(X_new)
 
 
 X_train, X_test, y_train, y_test = train_test_split(X_new, y, test_size=split, random_state=42)
