@@ -135,8 +135,17 @@ best_model.fit(X_train, y_train)
 
 # Evaluation
 y_pred = best_model.predict(X_test)
-print(confusion_matrix(y_test, y_pred))
-print(classification_report(y_test, y_pred))
+conf_matrix = confusion_matrix(y_test, y_pred)
+class_report = classification_report(y_test, y_pred, output_dict=True)
+
+# Convert confusion matrix to a DataFrame
+conf_matrix_df = pd.DataFrame(conf_matrix, index=['Actual_0', 'Actual_1'], columns=['Predicted_0', 'Predicted_1'])
+conf_matrix_df.to_csv('../output/confusion_matrix_svm.csv')
+
+# Convert classification report to a DataFrame
+class_report_df = pd.DataFrame(class_report).transpose()
+class_report_df.to_csv('../output/classification_report_svm.csv')
+
 
 # Predict probabilities for the test set
 y_prob = best_model.predict_proba(X_test)[:, 1]  # Get the probabilities for the positive class
