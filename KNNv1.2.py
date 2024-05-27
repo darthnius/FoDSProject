@@ -25,7 +25,7 @@ def evaluate_features_knn(k, n_neighbors):
     return scores.mean()
 
 #variables
-num_Neighbor = 21
+num_Neighbor = 19
 split = 0.3
 best_k_num = 52
 
@@ -42,7 +42,7 @@ y = data.iloc[:, -1].values
 #Elbow plot to determine k
 x_training_data, x_test_data, y_training_data, y_test_data = train_test_split(X, y, test_size = split)
 error_rates = []
-for i in np.arange(1, 50, step=2):
+for i in np.arange(1, 101, step=2):
     new_model = KNeighborsClassifier(n_neighbors = i)
     new_model.fit(x_training_data, y_training_data)
     new_predictions = new_model.predict(x_test_data)
@@ -54,7 +54,7 @@ plt.xlabel('Number of Neighbors')
 plt.ylabel('Error Rate')
 plt.title('Elbow Plot for n Selection')
 plt.plot(error_rates)
-plt.savefig(f"../output/kNN_Elbow_{str(split)}_split.png")
+plt.savefig(f"../FoDSProject/kNN_performance/kNN_Elbow_{str(split)}_split.png")
 plt.close()
 
 #resampling
@@ -76,7 +76,7 @@ plt.xlabel('Number of Features')
 plt.ylabel('Cross-Validated Accuracy')
 plt.title('Feature Selection using ANOVA for KNN')
 plt.grid()
-plt.savefig(f"../output/kNN_feature_selection_{str(split)}_split{num_Neighbor}_neighbors.png")
+plt.savefig(f"../FoDSProject/kNN_performance/kNN_feature_selection_{str(split)}_split{num_Neighbor}_neighbors.png")
 plt.close()
 
 selector = SelectKBest(f_classif, k=best_k_num)
@@ -115,7 +115,7 @@ plt.xlabel("False Positive Rate")
 plt.ylabel("True Positive Rate")
 plt.title("ROC-Curve")
 plt.legend(loc="lower right")
-plt.savefig(f"../output/kNN_ROC_{str(split)}_split{num_Neighbor}_neighbors.png")
+plt.savefig(f"../FoDSProject/kNN_performance/kNN_ROC_{str(split)}_split{num_Neighbor}_neighbors.png")
 
 metric_Df = pd.DataFrame({"precision": precision.tolist(), "recall": recall.tolist(), "fscore": fscore.tolist(), "support": support.tolist()})
-metric_Df.to_csv(f"../output/kNN_metrics_{str(split)}_split{num_Neighbor}_neighbors.csv")
+metric_Df.to_csv(f"../FoDSProject/kNN_performance/kNN_metrics_{str(split)}_split{num_Neighbor}_neighbors.csv")
