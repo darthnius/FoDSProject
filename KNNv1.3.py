@@ -27,7 +27,7 @@ def evaluate_features_knn(k, n_neighbors):
     return scores.mean()
 
 #variables
-num_Neighbor = 11
+num_Neighbor = 3
 split = 0.2
 
 #read data
@@ -44,14 +44,11 @@ y = data.iloc[:, -1].values
 # Split the data into training and testing sets
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Handle class imbalance using SMOTE
-smote = SMOTE(random_state=42)
-X_train_resampled, y_train_resampled = smote.fit_resample(X_train, y_train)
 
 error_rates = []
-for i in np.arange(1, 302, step=2):
+for i in np.arange(1, 41):
     new_model = KNeighborsClassifier(n_neighbors = i)
-    new_model.fit(X_train_resampled, y_train_resampled)
+    new_model.fit(X_train, y_train)
     new_predictions = new_model.predict(X_test)
     print(np.mean(new_predictions != y_test))
     error_rates.append(np.mean(new_predictions != y_test))
@@ -63,6 +60,11 @@ plt.title('Elbow Plot for n Selection')
 plt.plot(error_rates)
 plt.savefig(f"../FoDSProject/kNN_performance/kNN_Elbow_{str(split)}_split.png")
 plt.close()
+
+
+# Handle class imbalance using SMOTE
+smote = SMOTE(random_state=42)
+X_train_resampled, y_train_resampled = smote.fit_resample(X_train, y_train)
 
 
 num_features = np.arange(1, 300)
@@ -107,7 +109,7 @@ X_train_resampled_new = scaler.fit_transform(X_train_resampled_new)
 X_test_new = scaler.transform(X_test_new)
 
 knn = KNeighborsClassifier(n_neighbors=num_Neighbor)
-knn.fit(X_train_resampled_new, y_train)
+knn.fit(X_train_resampled_new, y_train_resampled)
 fpr, tpr, thresholds = metrics.roc_curve(y_test, knn.predict_proba(X_test_new)[:,1])
 auc = metrics.roc_auc_score(y_test,knn.predict(X_test_new))
 plt.plot(fpr, tpr, label='%s ROC (area = %0.2f)' % (1, auc))
