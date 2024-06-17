@@ -129,7 +129,7 @@ def eval_Performance(y_eval, X_eval, clf, clf_name = 'My Classifier'):
     # Calculate the area under the roc curve using a sklearn function
     roc_auc = auc(fp_rates, tp_rates)
     
-    fig, ax = plt.subplots(figsize=(6, 6))
+    fig, ax = plt.subplots(figsize=(10, 6))
     ax.plot(fp_rates, tp_rates, label=f'ROC curve (AUC={roc_auc:.2f})')
     ax.plot([0, 1], [0, 1], color="r", ls="--", label='random\nclassifier')
     #ax.set_xlim([0.0, 1.0])
@@ -140,7 +140,8 @@ def eval_Performance(y_eval, X_eval, clf, clf_name = 'My Classifier'):
     ax.set_title(f'ROC curve for {clf_name}')
 
     plt.tight_layout()
-    plt.savefig(f'./LogReg_output/ROC_curve_{clf_name}.png')
+    plt.savefig(f'./LogReg_output/ROC_curve_ {clf_name}.png')
+    plt.show()
 
     return tp,fp,tn,fn,accuracy, precision, recall, f1, roc_auc
 
