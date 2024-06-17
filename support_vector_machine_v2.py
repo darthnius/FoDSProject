@@ -24,18 +24,7 @@ data_labels = pd.read_csv("../data/driams_Escherichia coli_Ceftriaxone_labels.cs
 data_features = data_features.rename(columns={data_features.columns[0]: "ID"})
 data_labels = data_labels.rename(columns={data_labels.columns[0]: "ID"})
 data = pd.merge(data_features, data_labels, on="ID", how="inner")
-print(data.head(3))
 
-#data exploring
-n_rows = data.shape[0] 
-n_cols = data.shape[1]
-print(f"The data contains {n_rows} rows and {n_cols} columns.")
-
-#missing data
-missing_data = data.isnull().any()
-columns_with_missing_data = missing_data[missing_data].index.tolist()
-print(missing_data)
-print(f"Missing data found in {len(columns_with_missing_data)} columns.")
 
 ###### Support Vector Maschine Model #######
 data = data.drop(columns=['ID'])
