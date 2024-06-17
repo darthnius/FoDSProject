@@ -18,10 +18,11 @@ from sklearn.feature_selection import SelectFromModel
 import random
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_curve, auc
 from imblearn.over_sampling import SMOTE
+from sklearn.model_selection import GridSearchCV
 
 #load data
-data_features = pd.read_csv("../data/DRIAMS-EC/driams_Escherichia coli_Ceftriaxone_features.csv")
-data_labels = pd.read_csv("../data/DRIAMS-EC/driams_Escherichia coli_Ceftriaxone_labels.csv")
+data_features = pd.read_csv("../data/driams_Escherichia coli_Ceftriaxone_features.csv")
+data_labels = pd.read_csv("../data/driams_Escherichia coli_Ceftriaxone_labels.csv")
 data_features = data_features.rename(columns={data_features.columns[0]: "ID"})
 data_labels = data_labels.rename(columns={data_labels.columns[0]: "ID"})
 data = pd.merge(data_features, data_labels, on="ID", how="inner")
@@ -108,9 +109,26 @@ X_new = scaler.transform(X_new)
 X_train, X_test, y_train, y_test = train_test_split(X_new, y, test_size=0.2, random_state=42)
 
 
+#Parameter tuning
+DO_TUNING = False
+param_grid = {
+  'C': [0.1, 1, 10, 100],
+}
+
+# GridSearchCV to find the best parameters
+if DO_TUNING:
+    grid_search = GridSearchCV(LogisticRegression(solver='liblinear', random_state=1), param_grid, cv=5, scoring='accuracy')
+    grid_search.fit(X_train, y_train)
+
+    # Print the best parameters and best score
+    print("Best parameters:", grid_search.best_params_)
+    print("Best cross-validation accuracy:", grid_search.best_score_)
+    
+
 #Fit the model
-logistic_regression_model = LogisticRegression(solver='liblinear', random_state=1)
+logistic_regression_model = LogisticRegression(solver='liblinear', random_state=1, C=0.1)
 logistic_regression_model.fit(X_train, y_train)
+
 
 #Evaluation metrics function
 def eval_Performance(y_eval, X_eval, clf, clf_name = 'My Classifier'):
@@ -131,17 +149,16 @@ def eval_Performance(y_eval, X_eval, clf, clf_name = 'My Classifier'):
     
     fig, ax = plt.subplots(figsize=(10, 6))
     ax.plot(fp_rates, tp_rates, label=f'ROC curve (AUC={roc_auc:.2f})')
-    ax.plot([0, 1], [0, 1], color="r", ls="--", label='random\nclassifier')
-    #ax.set_xlim([0.0, 1.0])
-    #ax.set_ylim([0.0, 1.0])
-    ax.set_xlabel('FPR')
-    ax.set_ylabel('TPR')
+    ax.plot([0, 1], [0, 1], color="grey", ls="--")
+    ax.set_xlim([0.0, 1.0])
+    ax.set_ylim([0.0, 1.05])
+    ax.set_xlabel('False Positive Rate')
+    ax.set_ylabel('True Positive Rate')
     ax.legend(loc="lower right")
-    ax.set_title(f'ROC curve for {clf_name}')
+    plt.title("Receiver Operating Characteristic (ROC) Curve")
 
-    plt.tight_layout()
+    #plt.tight_layout()
     plt.savefig(f'./LogReg_output/ROC_curve_ {clf_name}.png')
-    plt.show()
 
     return tp,fp,tn,fn,accuracy, precision, recall, f1, roc_auc
 

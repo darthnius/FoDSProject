@@ -16,13 +16,14 @@ import random
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_curve, auc
 
 
-data_feats = pd.read_csv("../data/DRIAMS-EC/driams_Escherichia coli_Ceftriaxone_features.csv")
-data_labels = pd.read_csv("../data/DRIAMS-EC/driams_Escherichia coli_Ceftriaxone_labels.csv")
+data_feats = pd.read_csv("../data/driams_Escherichia coli_Ceftriaxone_features.csv")
+data_labels = pd.read_csv("../data/driams_Escherichia coli_Ceftriaxone_labels.csv")
 print(data_feats.head(5))
 print(data_labels.head(5))
 print(data_feats.shape)
 print(data_labels.shape)
 print(data_labels['Unnamed: 0'].nunique()) #no multiple entries of same sample ID
+print(data_labels['label'].value_counts())
 
 #How many patients do have a resistance
 plt.figure(figsize=(10, 5))
@@ -33,7 +34,7 @@ plt.title('Distribution of Antibiotic Resistance')
 plt.xlabel('Resistance')
 plt.ylabel('Number of Patients')
 
-plt.savefig('../figures/Resistance_distribution.png')
+plt.savefig('./overview_data/Resistance_distribution.png')
 
 #check for missing values
 print(f"Missing values in the features: {data_feats.isnull().sum().sum()}")
@@ -66,7 +67,7 @@ for i, ax in enumerate(ax.flatten()):
 plt.suptitle('Distribution of some random chosen Features')
 fig.tight_layout()
 
-plt.savefig('../figures/Random_Features_distribution.png')
+plt.savefig('./overview_data/Random_Features_distribution.png')
 
 ###test for normality in the random features###
 # extract the two groups you want to compare
@@ -87,8 +88,11 @@ for feat in random_feats:
 
     significance_level = 0.05 / len(random_feats)
     #if p-value < significance level -> the two groups(resistant not resistant) are significantly different in that feature
+    if statistical_test.pvalue < significance_level:
+        print(f"Feature {feat} is significantly different between the two groups")
+    else:
+        print(f"Feature {feat} is not significantly different between the two groups")
 
 #probably most features like these random features are not normally disributed
 #some fetaures seem to be significantly different between the two groups, some don't
 
-#ADD MULTIPLE TESTING ADJUSTMENT??? line 107 (tutorial 6)
